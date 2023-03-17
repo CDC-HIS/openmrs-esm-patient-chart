@@ -7,6 +7,8 @@ import { ExtensionSlot, age, formatDate, parseDate, useConfig } from '@openmrs/e
 import ContactDetails from '../contact-details/contact-details.component';
 import CustomOverflowMenuComponent from '../ui-components/overflow-menu.component';
 import styles from './patient-banner.scss';
+import { EthiopicCalendar, toCalendar, CalendarDate } from '@internationalized/date';
+import moment from 'moment';
 
 interface PatientBannerProps {
   patient: fhir.Patient;
@@ -15,6 +17,22 @@ interface PatientBannerProps {
   onTransition?: () => void;
   hideActionsOverflow?: boolean;
 }
+
+const gregToEth = (gregdate: any) => {
+  gregdate = moment(gregdate).format('DD/MM/YYYY');
+  console.log(gregdate);
+  if (!gregdate) return null;
+  let dmy = gregdate.split('/');
+  if (dmy.length == 3) {
+    let year = parseInt(dmy[2], 10);
+    let month = parseInt(dmy[0], 10);
+    let day = parseInt(dmy[1], 10);
+    let gregorianDate = new CalendarDate(year, month, day);
+    let ethiopianDate = toCalendar(gregorianDate, new EthiopicCalendar());
+    let finalDate = ethiopianDate.year + '-' + ethiopianDate.month + '-' + ethiopianDate.day;
+    return finalDate;
+  } else return null;
+};
 
 const PatientBanner: React.FC<PatientBannerProps> = ({
   patient,
@@ -120,7 +138,7 @@ const PatientBanner: React.FC<PatientBannerProps> = ({
           </div>
           <div className={styles.demographics}>
             <span>{getGender(patient.gender)}</span> &middot; <span>{age(patient.birthDate)}</span> &middot;{' '}
-            <span>{formatDate(parseDate(patient?.birthDate), { mode: 'wide', time: false })}</span>
+            <span>{gregToEth(parseDate(patient.birthDate))}</span>
           </div>
           <div className={styles.row}>
             <div className={styles.identifiers}>
