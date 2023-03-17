@@ -14,7 +14,7 @@ const VisitHeaderSideMenu: React.FC<VisitHeaderSideMenu> = ({ isExpanded, toggle
     return window.addEventListener('popstate', toggleSideMenu);
   }, [toggleSideMenu]);
 
-  return isExpanded ? <LeftNavMenu ref={menuRef} /> : null;
+  return isExpanded ? <LeftNavMenu style={{ overflowY: 'auto' }} ref={menuRef} /> : null;
 };
 
 export default VisitHeaderSideMenu;
