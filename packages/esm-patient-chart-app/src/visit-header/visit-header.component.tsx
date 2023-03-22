@@ -259,6 +259,7 @@ const VisitHeader: React.FC = () => {
     endVisitLabel,
     openModal,
     currentVisit,
+    facilityLocation,
   ]);
 
   return <HeaderContainer render={render} />;

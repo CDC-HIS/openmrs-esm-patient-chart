@@ -20,7 +20,6 @@ interface PatientBannerProps {
 
 const gregToEth = (gregdate: any) => {
   gregdate = moment(gregdate).format('DD/MM/YYYY');
-  console.log(gregdate);
   if (!gregdate) return null;
   let dmy = gregdate.split('/');
   if (dmy.length == 3) {
