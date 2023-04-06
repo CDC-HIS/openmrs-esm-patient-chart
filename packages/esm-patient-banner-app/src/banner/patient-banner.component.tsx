@@ -1,6 +1,5 @@
-import React, { MouseEvent } from 'react';
+import React, { MouseEvent, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import capitalize from 'lodash-es/capitalize';
 import { Button, Tag } from '@carbon/react';
 import { ChevronDown, ChevronUp, OverflowMenuVertical } from '@carbon/react/icons';
 import { ExtensionSlot, age, formatDate, parseDate, useConfig } from '@openmrs/esm-framework';
@@ -40,6 +39,7 @@ const PatientBanner: React.FC<PatientBannerProps> = ({
   onTransition,
   hideActionsOverflow,
 }) => {
+  const { excludePatientIdentifierCodeTypes } = useConfig();
   const { t } = useTranslation();
   const overflowMenuRef = React.useRef(null);
 
@@ -52,8 +52,7 @@ const PatientBanner: React.FC<PatientBannerProps> = ({
   const patientPhotoSlotState = React.useMemo(() => ({ patientUuid, patientName }), [patientUuid, patientName]);
 
   const [showContactDetails, setShowContactDetails] = React.useState(false);
-  const toggleContactDetails = React.useCallback((event: MouseEvent) => {
-    event.stopPropagation();
+  const toggleContactDetails = useCallback(() => {
     setShowContactDetails((value) => !value);
   }, []);
 
@@ -63,14 +62,17 @@ const PatientBanner: React.FC<PatientBannerProps> = ({
     </div>
   );
 
-  const handleNavigateToPatientChart = (event: MouseEvent) => {
-    if (onClick) {
-      !(overflowMenuRef?.current && overflowMenuRef?.current.contains(event.target)) && onClick(patientUuid);
-    }
-  };
-  const [showDropdown, setShowDropdown] = React.useState(false);
-  const closeDropdownMenu = React.useCallback((event: MouseEvent) => {
-    event.stopPropagation();
+  const handleNavigateToPatientChart = useCallback(
+    (event: MouseEvent) => {
+      if (onClick) {
+        !(overflowMenuRef?.current && overflowMenuRef?.current.contains(event.target)) && onClick(patientUuid);
+      }
+    },
+    [onClick, patientUuid],
+  );
+
+  const [showDropdown, setShowDropdown] = useState(false);
+  const closeDropdownMenu = useCallback(() => {
     setShowDropdown((value) => !value);
   }, []);
 
@@ -89,8 +91,7 @@ const PatientBanner: React.FC<PatientBannerProps> = ({
     }
   };
 
-  const { excludePatientIdentifierCodeTypes } = useConfig();
-  const identifiers = patient?.identifier.filter(
+  const identifiers = patient?.identifier?.filter(
     (identifier) => !excludePatientIdentifierCodeTypes?.uuids.includes(identifier.type.coding[0].code),
   );
 
