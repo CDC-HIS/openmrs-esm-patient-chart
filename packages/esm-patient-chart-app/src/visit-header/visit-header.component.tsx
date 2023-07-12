@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Button,
@@ -29,6 +29,7 @@ import { EditQueueEntry } from '../visit/queue-entry/edit-queue-entry.component'
 import VisitHeaderSideMenu from './visit-header-side-menu.component';
 import styles from './visit-header.scss';
 import { useSystemVisitSetting } from '../visit/visit.resource';
+import { fetchLocation } from '../patient-chart.resource';
 
 interface PatientInfoProps {
   patient: fhir.Patient;
@@ -153,6 +154,20 @@ const VisitHeader: React.FC = () => {
 
   const hasActiveVisit = !isLoading && !visitNotLoaded;
 
+  const [facilityLocation, setFacilityLocation] = useState('');
+
+  useEffect(() => {
+    const loadFacilityLocation = async () => {
+      const facilitylocation = await fetchLocation();
+      facilitylocation.data.results.forEach((element) => {
+        if (element.tags.some((x) => x.display === 'Facility Location')) {
+          setFacilityLocation(element.display);
+        }
+      });
+    };
+    loadFacilityLocation();
+  }, [facilityLocation]);
+
   const onClosePatientChart = useCallback(() => {
     const originPage = localStorage.getItem('fromPage');
     localStorage.removeItem('fromPage');
@@ -203,6 +218,10 @@ const VisitHeader: React.FC = () => {
               )}
             </div>
           </ConfigurableLink>
+          <div className={styles.navDivider} />
+          <div className={styles.patientDetails}>
+            <PatientFacilityInformation facilityLocation={facilityLocation} />
+          </div>
           <div className={styles.navDivider} />
           <div className={styles.patientDetails}>
             <PatientInfo patient={patient} />
@@ -259,9 +278,16 @@ const VisitHeader: React.FC = () => {
     logo,
     isDeceased,
     systemVisitEnabled,
+    facilityLocation,
   ]);
 
   return <HeaderContainer render={render} />;
+};
+interface PatientFacilityInformationProps {
+  facilityLocation: string;
+}
+const PatientFacilityInformation: React.FC<PatientFacilityInformationProps> = ({ facilityLocation }) => {
+  return <span className={styles.patientName}>{facilityLocation}</span>;
 };
 
 export default VisitHeader;
